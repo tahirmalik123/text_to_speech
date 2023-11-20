@@ -1,0 +1,217 @@
+<!-- template.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Messaging App</title>
+</head>
+
+    <section class="numberContMain pwsMain practWTobyMain">
+        <div
+                class="numSubSecMain quesSubMain specSubMain addQuizSubMain subQuizMain divQuizSubMain pwsSubMain pracWTobyMain"
+        >
+            <div class="divQuizSubHead playWShapHead">
+                <h2 class="h2">Practice English with Toby</h2>
+                <!-- <a href="#" data-toggle="modal" data-target="#modalOne">
+                            <img src="../html/images/playWshapesBtn.svg" alt="" />
+                          </a> -->
+            </div>
+            <div class="pwsSecTwo pwtSecMain">
+                <div class="pwtSecLeft">
+                    <img src="{% static 'assets/images/tobyImg.svg' %}" alt=""/>
+                    <div>
+                        <h4 class="h4">Hi, I am Toby. Let's learn about the alphabets.</h4>
+                        <!-- <button data-toggle="modal" data-target="#modalOne">Press Here</button> -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            {#<input type="text" name="user_input" id="user_input"/>#}
+                            <button type="button" id="recording"><span>Press Here</span>
+                                <div class="loaderIcon"></div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="pwtSecRight">
+                    <div class="tobyRow">
+                        <img src="{% static 'assets/images/tobyChatImg.svg' %}" alt=""/>
+                        <h6 class="h6">What alphabet do you want to learn today?</h6>
+                    </div>
+                    <div class="studRow">
+                        <img src="{% static 'assets/images/studChatImg.svg' %}" alt=""/>
+                        <h6 class="h6">
+                            "A" or "I want to learn the alphabet A" or "I want to learn more
+                            about B"
+                        </h6>
+                    </div>
+                    <div class="tobyRow">
+                        <img src="{% static 'assets/images/tobyChatImg.svg' %}" alt=""/>
+                        <h6 class="h6">
+                            Wonderful. Let's Begin! A is the first letter in the English
+                            alphabet. Some popular words starting with A are apple and apricot.
+                            Do you want to learn another alphabet?
+                        </h6>
+                    </div>
+                    <div class="studRow">
+                        <img src="{% static 'assets/images/studChatImg.svg' %}" alt=""/>
+                        <h6 class="h6">
+                            No or Yes or I don't want to talk. or Yes, I do. Or yeah why not. I
+                            want to learn more about Z
+                        </h6>
+                    </div>
+                    <div class="tobyRow">
+                        <img src="{% static 'assets/images/tobyChatImg.svg' %}" alt=""/>
+                        <h6 class="h6">
+                            I am happy to talk about Z. Z is the twenty-sixth and last letter in
+                            the English alphabet. Z stands for Zero and Zoo. Do you want to
+                            learn another alphabet?
+                        </h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- modal One  -->
+
+    <!-- Modal -->
+    <div
+            class="modal fade"
+            data-backdrop="static"
+            id="modalOne"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalCenterTitle"
+            aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="h6">PAUSED</h6>
+                    <div>
+                        <a href="#"
+                        ><img src="{% static 'assets/images/reload.svg' %}" alt=""
+                        /></a>
+                        <a href="#" data-dismiss="modal"
+                        ><img src="{% static 'assets/images/PlayBtn.svg' %}" alt=""
+                        /></a>
+                        <a href="#"
+                        ><img src="{% static 'assets/images/sound_medium.svg' %}" alt=""
+                        /></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal One end -->
+
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        let press_btn = document.getElementById('recording')
+
+        window.onload = function () {
+            if (localStorage.getItem('showPopup') === null) {
+                swal("Toby will use your Mic");
+            }
+            localStorage.setItem('showPopup', false);
+        }
+
+        // appends an audio element to playback and download recording
+        function createAudioElement(blobUrl) {
+            const downloadEl = document.createElement('a');
+            downloadEl.style = 'display: block';
+            downloadEl.innerHTML = 'download';
+            downloadEl.download = 'audio.webm';
+            downloadEl.href = blobUrl;
+            {% comment %} console.log('downloadEl', downloadEl) {% endcomment %}
+            const audioEl = document.createElement('audio');
+            audioEl.controls = true;
+            const sourceEl = document.createElement('source');
+            sourceEl.src = blobUrl;
+            sourceEl.type = 'audio/webm';
+            audioEl.appendChild(sourceEl);
+            document.body.appendChild(audioEl);
+            document.body.appendChild(downloadEl);
+        }
+
+        // request permission to access audio stream
+        press_btn.addEventListener('click', () => {
+            $("#recording span").toggle(300);
+            $(".loaderIcon").toggle(400);
+
+            let count = 0;
+            let hasResponded = false;
+            navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+                // store streaming data chunks in array
+                const chunks = [];
+                // create media recorder instance to initialize recording
+                const recorder = new MediaRecorder(stream);
+                // function to be called when data is received
+                recorder.ondataavailable = e => {
+                    // add stream data to chunks
+                    chunks.push(e.data);
+                    // if recorder is 'inactive' then recording has finished
+                    if (recorder.state == 'inactive') {
+                        // convert stream data chunks to a 'webm' audio format as a blob
+                        const blob = new Blob(chunks, {type: 'audio/webm'});
+                        // convert blob to URL so it can be assigned to a audio src attribute
+                        // createAudioElement(URL.createObjectURL(blob));
+                        if (!hasResponded) {
+                            getResponse(blob);
+                            hasResponded = true;
+                        }
+                        // getResponse(blob);
+                        // hasResponded = true;
+                        count += 1;
+                        console.log('count', count)
+                    }
+                };
+                // start recording with 1 second time between receiving 'ondataavailable' events
+                recorder.start(1000);
+                // setTimeout to stop recording after 4 seconds
+                setTimeout(() => {
+                    // this will trigger one final 'ondataavailable' event and set recorder state to 'inactive'
+                    recorder.stop();
+                }, 4000);
+            }).catch(console.error);
+        })
+
+
+        const getResponse = (audioFile) => {
+            let formData = new FormData();
+            formData.append('audio', audioFile);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            press_btn.disabled = true;
+            fetch('{% url 'voice_chat' %}', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                return response.json()
+            }).then(data => {
+                console.log('data', data)
+                let response_url = data['tts_response']
+                let tts_response = new Audio(response_url);
+                let response_duration = tts_response.duration * 1000;
+                console.log('response_duration', response_duration)
+                setTimeout(() => {
+                    press_btn.disabled = false;
+                }, response_duration)
+                $("#recording span").toggle(300);
+                $(".loaderIcon").toggle(400);
+                tts_response.play();
+                tts_response = null;
+            })
+        }
+
+        //        $("#recording").click(function(){
+
+        //  $("#recording span").toggle(300);
+        //  $(".loaderIcon").toggle(400);
+
+        //  });
+
+    </script>
+</html>
