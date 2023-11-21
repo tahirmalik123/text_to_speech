@@ -45,6 +45,11 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    "https://react-gpt-task.netlify.app",
+]
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -55,10 +60,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = [
-    "https://react-gpt-task.netlify.app",
-]
+
 
 
 ROOT_URLCONF = 'AudioAI.urls'
